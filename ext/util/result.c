@@ -3,6 +3,7 @@
 #include "math.h"
 #include "collections.h"
 #include "../src/Cassandra/Collection.h"
+#include "../src/Cassandra/Tuple.h"
 #include "../src/Cassandra/Map.h"
 #include "../src/Cassandra/Set.h"
 
@@ -30,6 +31,7 @@ php_cassandra_value(const CassValue* value, CassValueType type, zval** out TSRML
   cassandra_decimal* decimal_number = NULL;
   cassandra_float* float_number = NULL;
   cassandra_collection* collection = NULL;
+  cassandra_tuple* tuple = NULL;
   cassandra_map* map = NULL;
   cassandra_set* set = NULL;
 
@@ -171,6 +173,28 @@ php_cassandra_value(const CassValue* value, CassValueType type, zval** out TSRML
       }
 
       php_cassandra_collection_add(collection, v TSRMLS_CC);
+      zval_ptr_dtor(&v);
+    }
+
+    cass_iterator_free(iterator);
+    break;
+  case CASS_VALUE_TYPE_TUPLE:
+    object_init_ex(return_value, cassandra_tuple_ce);
+    tuple = (cassandra_tuple*) zend_object_store_get_object(return_value TSRMLS_CC);
+    tuple->type = type;
+
+    iterator = cass_iterator_from_tuple(value);
+    while (cass_iterator_next(iterator)) {
+      zval *v;
+      const CassValue* value = cass_iterator_get_value(iterator);
+
+      if (php_cassandra_value(value, cass_value_type(value),
+                              &v TSRMLS_CC) == FAILURE) {
+        zval_ptr_dtor(&return_value);
+        return FAILURE;
+      }
+
+      php_cassandra_tuple_add(tuple, v TSRMLS_CC);
       zval_ptr_dtor(&v);
     }
 

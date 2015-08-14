@@ -111,6 +111,7 @@ Bug Fixes:
       <file role="src" name="src/Cassandra/Statement.c" />
       <file role="src" name="src/Cassandra/Timestamp.c" />
       <file role="src" name="src/Cassandra/Timeuuid.c" />
+      <file role="src" name="src/Cassandra/Tuple.c" />
       <file role="src" name="src/Cassandra/Uuid.c" />
       <file role="src" name="src/Cassandra/UuidInterface.c" />
       <file role="src" name="src/Cassandra/Varint.c" />

@@ -65,6 +65,7 @@ if (PHP_CASSANDRA != "no" &&
             "Statement.c " +
             "Timestamp.c " +
             "Timeuuid.c " +
+            "Tuple.c " +
             "Uuid.c " +
             "UuidInterface.c " +
             "Varint.c", "cassandra");

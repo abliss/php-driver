@@ -83,6 +83,13 @@ typedef struct {
 
 typedef struct {
   zend_object zval;
+  size_t size;
+  CassValueType type;
+  HashTable values;
+} cassandra_tuple;
+
+typedef struct {
+  zend_object zval;
   CassCluster* cluster;
   long default_consistency;
   int default_page_size;
@@ -262,6 +269,7 @@ extern PHP_CASSANDRA_API zend_class_entry* cassandra_uuid_ce;
 extern PHP_CASSANDRA_API zend_class_entry* cassandra_timeuuid_ce;
 extern PHP_CASSANDRA_API zend_class_entry* cassandra_varint_ce;
 
+extern PHP_CASSANDRA_API zend_class_entry* cassandra_tuple_ce;
 extern PHP_CASSANDRA_API zend_class_entry* cassandra_set_ce;
 extern PHP_CASSANDRA_API zend_class_entry* cassandra_map_ce;
 extern PHP_CASSANDRA_API zend_class_entry* cassandra_collection_ce;
@@ -304,6 +312,7 @@ void cassandra_define_Inet(TSRMLS_D);
 void cassandra_define_Map(TSRMLS_D);
 void cassandra_define_Set(TSRMLS_D);
 void cassandra_define_Timestamp(TSRMLS_D);
+void cassandra_define_Tuple(TSRMLS_D);
 void cassandra_define_UuidInterface(TSRMLS_D);
 void cassandra_define_Uuid(TSRMLS_D);
 void cassandra_define_Timeuuid(TSRMLS_D);
