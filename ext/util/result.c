@@ -42,7 +42,6 @@ php_cassandra_value(const CassValue* value, CassValueType type, zval** out TSRML
     *out = return_value;
     return SUCCESS;
   }
-
   switch (type) {
   case CASS_VALUE_TYPE_ASCII:
   case CASS_VALUE_TYPE_TEXT:
@@ -59,6 +58,18 @@ php_cassandra_value(const CassValue* value, CassValueType type, zval** out TSRML
       return FAILURE;
     );
     RETVAL_LONG(v_int_32);
+    break;
+  case 0x14: /* XXXX CASS_VALUE_TYPE_TINYINT */
+  case CASS_VALUE_TYPE_CUSTOM: /* XXXX TODO(ablis): Why do tinyints get 0? */
+    ASSERT_SUCCESS_BLOCK(cass_value_get_bytes(value, &v_bytes, &v_bytes_len),
+      zval_ptr_dtor(&return_value);
+      return FAILURE;
+    )
+    if (v_bytes_len != 1) {
+      RETVAL_NULL();
+    }
+    // TODO(abliss): Should twos-complement for signed bytes
+    RETVAL_LONG(v_bytes[0]);
     break;
   case CASS_VALUE_TYPE_COUNTER:
   case CASS_VALUE_TYPE_BIGINT:
