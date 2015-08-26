@@ -271,6 +271,16 @@ PHP_METHOD(Rows, first)
   zend_hash_set_pointer(Z_ARRVAL_P(self->rows), &ptr);
 }
 
+PHP_METHOD(Rows, getPagingStateToken)
+{
+  const char* token;
+  size_t len;
+  cassandra_rows* self = (cassandra_rows*) zend_object_store_get_object(getThis() TSRMLS_CC);
+  ASSERT_SUCCESS(cass_result_paging_state_token(self->result, &token, &len));
+  RETURN_STRINGL(estrndup(token, len), len, 0);
+}
+
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_none, 0, ZEND_RETURN_VALUE, 0)
 ZEND_END_ARG_INFO()
 
@@ -303,6 +313,7 @@ static zend_function_entry cassandra_rows_methods[] = {
   PHP_ME(Rows, nextPage,      arginfo_timeout, ZEND_ACC_PUBLIC)
   PHP_ME(Rows, nextPageAsync, arginfo_none,    ZEND_ACC_PUBLIC)
   PHP_ME(Rows, first,         arginfo_none,    ZEND_ACC_PUBLIC)
+  PHP_ME(Rows, getPagingStateToken, arginfo_none, ZEND_ACC_PUBLIC)
   PHP_FE_END
 };
 

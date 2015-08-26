@@ -13,6 +13,7 @@ PHP_METHOD(ExecutionOptions, __construct)
   zval** consistency = NULL;
   zval** serial_consistency = NULL;
   zval** page_size = NULL;
+  zval** paging_state_token = NULL;
   zval** timeout = NULL;
   zval** arguments = NULL;
 
@@ -45,6 +46,14 @@ PHP_METHOD(ExecutionOptions, __construct)
       INVALID_ARGUMENT(*page_size, "greater than zero");
     }
     self->page_size = Z_LVAL_P(*page_size);
+  }
+
+  if (zend_hash_find(Z_ARRVAL_P(options), "paging_state_token", sizeof("paging_state_token"), (void**)&paging_state_token) == SUCCESS) {
+    if (Z_TYPE_P(*paging_state_token) != IS_STRING) {
+      INVALID_ARGUMENT(*paging_state_token, "a string");
+    }
+    self->paging_state_token = estrndup(Z_STRVAL_P(*paging_state_token), Z_STRLEN_P(*paging_state_token));
+    self->paging_state_token_size = Z_STRLEN_P(*paging_state_token);
   }
 
   if (zend_hash_find(Z_ARRVAL_P(options), "timeout", sizeof("timeout"), (void**)&timeout) == SUCCESS) {
@@ -87,6 +96,8 @@ PHP_METHOD(ExecutionOptions, __get)
     RETURN_LONG(self->serial_consistency);
   } else if (name_len == 8 && strncmp("pageSize", name, name_len) == 0) {
     RETURN_LONG(self->page_size);
+  } else if (name_len == 16 && strncmp("pagingStateToken", name, name_len) == 0) {
+    RETURN_STRING(self->paging_state_token, self->paging_state_token_size);
   } else if (name_len == 7 && strncmp("timeout", name, name_len) == 0) {
     RETURN_ZVAL(self->timeout, 1, 0);
   } else if (name_len == 9 && strncmp("arguments", name, name_len) == 0) {
@@ -137,7 +148,9 @@ php_cassandra_execution_options_free(void *object TSRMLS_DC)
     zval_ptr_dtor(&options->arguments);
     options->arguments = NULL;
   }
-
+  if (options->paging_state_token) {
+    efree(options->paging_state_token);
+  }
   zend_object_std_dtor(&options->zval TSRMLS_CC);
   efree(options);
 }
@@ -156,6 +169,7 @@ php_cassandra_execution_options_new(zend_class_entry* class_type TSRMLS_DC)
   options->consistency = -1;
   options->serial_consistency = -1;
   options->page_size = -1;
+  options->paging_state_token = NULL;
   options->timeout = NULL;
   options->arguments = NULL;
 

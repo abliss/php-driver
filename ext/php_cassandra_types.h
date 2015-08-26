@@ -141,6 +141,8 @@ typedef struct {
   long consistency;
   long serial_consistency;
   int page_size;
+  char* paging_state_token;
+  size_t paging_state_token_size;
   zval* timeout;
   zval* arguments;
 } cassandra_execution_options;
