@@ -8,6 +8,7 @@ php_cassandra_tuple_add(cassandra_tuple* tuple, zval* object TSRMLS_DC)
 {
   if (zend_hash_next_index_insert(&tuple->values, (void*) &object, sizeof(zval*), NULL) == SUCCESS) {
     Z_ADDREF_P(object);
+    tuple->size++;
     return 1;
   }
 
@@ -27,7 +28,6 @@ php_cassandra_tuple_get(cassandra_tuple* tuple, ulong index, zval** zvalue)
   return 0;
 }
 
-
 /* {{{ Cassandra\Tuple::get(int) */
 PHP_METHOD(Tuple, get)
 {
@@ -44,6 +44,16 @@ PHP_METHOD(Tuple, get)
     RETURN_ZVAL(value, 1, 0);
 }
 /* }}} */
+
+/* {{{ Cassandra\Tuple::count() */
+PHP_METHOD(Tuple, count)
+{
+  cassandra_tuple* tuple = (cassandra_tuple*) zend_object_store_get_object(getThis() TSRMLS_CC);
+
+  RETURN_LONG(tuple->size);
+}
+/* }}} */
+
 /* {{{ Cassandra\Tuple::__construct(string) */
 PHP_METHOD(Tuple, __construct)
 {
@@ -56,7 +66,7 @@ PHP_METHOD(Tuple, __construct)
   }
 
   tuple = (cassandra_tuple*) zend_object_store_get_object(getThis() TSRMLS_CC);
-
+  tuple->size = 0;
   php_cassandra_value_type(type, &tuple->type TSRMLS_CC);
 }
 
@@ -78,6 +88,7 @@ ZEND_END_ARG_INFO()
 
 static zend_function_entry cassandra_tuple_methods[] = {
   PHP_ME(Tuple, __construct, arginfo__construct, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
+  PHP_ME(Tuple, count, arginfo_none, ZEND_ACC_PUBLIC)
   PHP_ME(Tuple, get, arginfo_index, ZEND_ACC_PUBLIC)
   PHP_FE_END
 };
